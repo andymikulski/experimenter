@@ -1,12 +1,35 @@
-from django.views.generic import DetailView
+from django.core.urlresolvers import reverse
+from django.views.generic import CreateView, DetailView
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework.response import Response
 
+from experimenter.experiments.forms import ExperimentForm
 from experimenter.experiments.models import Experiment, ExperimentChangeLog
 from experimenter.experiments.serializers import (
     ExperimentSerializer,
 )
 
+
+class ExperimentCreateView(CreateView):
+    model = Experiment
+    form_class = ExperimentForm
+    template_name = 'experiments/edit.html'
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['request'] = self.request
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+
+        if 'project' in self.request.GET:
+            initial['project'] = self.request.GET['project']
+
+        return initial
+
+    def get_success_url(self):
+        return reverse('experiments-detail', kwargs={'slug': self.object.slug})
 
 class ExperimentDetailView(DetailView):
     model = Experiment

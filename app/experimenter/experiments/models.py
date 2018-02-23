@@ -10,6 +10,8 @@ from django.db.models import Max
 from django.utils import timezone
 from django.utils.functional import cached_property
 
+from experimenter.experiments.constants import ExperimentConstants
+
 
 class ExperimentManager(models.Manager):
 
@@ -21,85 +23,7 @@ class ExperimentManager(models.Manager):
         )
 
 
-class Experiment(models.Model):
-    STATUS_CREATED = 'Created'
-    STATUS_PENDING = 'Pending'
-    STATUS_ACCEPTED = 'Accepted'
-    STATUS_LAUNCHED = 'Launched'
-    STATUS_COMPLETE = 'Complete'
-    STATUS_REJECTED = 'Rejected'
-
-    STATUS_CHOICES = (
-        (STATUS_CREATED, STATUS_CREATED),
-        (STATUS_PENDING, STATUS_PENDING),
-        (STATUS_ACCEPTED, STATUS_ACCEPTED),
-        (STATUS_LAUNCHED, STATUS_LAUNCHED),
-        (STATUS_COMPLETE, STATUS_COMPLETE),
-        (STATUS_REJECTED, STATUS_REJECTED),
-    )
-
-    STATUS_TRANSITIONS = {
-        STATUS_CREATED: [
-            STATUS_PENDING,
-            STATUS_REJECTED,
-        ],
-        STATUS_PENDING: [
-            STATUS_ACCEPTED,
-            STATUS_REJECTED,
-        ],
-        STATUS_ACCEPTED: [
-            STATUS_LAUNCHED,
-            STATUS_REJECTED,
-        ],
-        STATUS_LAUNCHED: [
-            STATUS_COMPLETE,
-        ],
-        STATUS_COMPLETE: [
-        ],
-        STATUS_REJECTED: [
-        ],
-    }
-
-    VERSION_CHOICES = (
-        ('55.0', '55.0'),
-        ('56.0', '56.0'),
-        ('57.0', '57.0'),
-        ('58.0', '58.0'),
-        ('59.0', '59.0'),
-        ('60.0', '60.0'),
-        ('61.0', '61.0'),
-        ('62.0', '62.0'),
-        ('63.0', '63.0'),
-        ('64.0', '64.0'),
-    )
-
-    CHANNEL_NIGHTLY = 'Nightly'
-    CHANNEL_BETA = 'Beta'
-    CHANNEL_RELEASE = 'Release'
-
-    CHANNEL_CHOICES = (
-        (CHANNEL_NIGHTLY, CHANNEL_NIGHTLY),
-        (CHANNEL_BETA, CHANNEL_BETA),
-        (CHANNEL_RELEASE, CHANNEL_RELEASE),
-    )
-
-    PREF_TYPE_BOOL = 'boolean'
-    PREF_TYPE_INT = 'integer'
-    PREF_TYPE_STR = 'string'
-
-    PREF_TYPE_CHOICES = (
-        (PREF_TYPE_BOOL, PREF_TYPE_BOOL),
-        (PREF_TYPE_INT, PREF_TYPE_INT),
-        (PREF_TYPE_STR, PREF_TYPE_STR),
-    )
-
-    PREF_BRANCH_USER = 'user'
-    PREF_BRANCH_DEFAULT = 'default'
-    PREF_BRANCH_CHOICES = (
-        (PREF_BRANCH_DEFAULT, PREF_BRANCH_DEFAULT),
-        (PREF_BRANCH_USER, PREF_BRANCH_USER),
-    )
-
+class Experiment(ExperimentConstants, models.Model):
     project = models.ForeignKey(
         'projects.Project',
         blank=False,
@@ -108,8 +32,8 @@ class Experiment(models.Model):
     )
     status = models.CharField(
         max_length=255,
-        default=STATUS_CREATED,
-        choices=STATUS_CHOICES,
+        default=ExperimentConstants.STATUS_CREATED,
+        choices=ExperimentConstants.STATUS_CHOICES,
     )
     name = models.CharField(
         max_length=255, unique=True, blank=False, null=False)
@@ -121,20 +45,23 @@ class Experiment(models.Model):
     pref_key = models.CharField(max_length=255, blank=True, null=True)
     pref_type = models.CharField(
         max_length=255,
-        choices=PREF_TYPE_CHOICES,
+        choices=ExperimentConstants.PREF_TYPE_CHOICES,
+        blank=True,
+        null=True,
     )
     pref_branch = models.CharField(
         max_length=255,
-        choices=PREF_BRANCH_CHOICES,
-        default=PREF_BRANCH_DEFAULT,
+        choices=ExperimentConstants.PREF_BRANCH_CHOICES,
+        blank=True,
+        null=True,
     )
     population_percent = models.DecimalField(
         max_digits=7, decimal_places=4, default='0')
-    firefox_version = models.CharField(max_length=255, choices=VERSION_CHOICES)
+    firefox_version = models.CharField(max_length=255, choices=ExperimentConstants.VERSION_CHOICES)
     firefox_channel = models.CharField(
-        max_length=255, choices=CHANNEL_CHOICES, default=CHANNEL_NIGHTLY)
+        max_length=255, choices=ExperimentConstants.CHANNEL_CHOICES)
     client_matching = models.TextField(default='', blank=True)
-    objectives = models.TextField(default='')
+    objectives = models.TextField(default='', blank=True, null=True)
     analysis = models.TextField(default='', blank=True, null=True)
     total_users = models.PositiveIntegerField(default=0)
     enrollment_dashboard_url = models.URLField(blank=True, null=True)
@@ -184,6 +111,10 @@ class Experiment(models.Model):
     @property
     def is_readonly(self):
         return self.status != self.STATUS_CREATED
+
+    @property
+    def is_begun(self):
+        return self.status in (self.STATUS_LAUNCHED, self.STATUS_COMPLETE)
 
     def _transition_date(self, start_state, end_state):
         change = self.changes.filter(

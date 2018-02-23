@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-md-8 col-md-offset-2 card">
+      <form 
+        class="form-horizontal card-content" 
+        method="POST" 
+        enctype='multipart/form-data'
+      >
+        {% csrf_token %}
+
+        <div class="form-group">
+          <div class="col-md-12">
+            {% if object %}
+              <h3>Edit {{ object.name }}</h3>
+            {% else %}
+              <h3>New Experiment</h3>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label" for="{{ form.project.id_for_label }}">Project</label>
+          <div class="col-md-9">
+            {{ form.project }}
+          </div>
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#project-help" data-toggle="collapse" aria-expanded="false" aria-controls="project-help">Help</a>
+          </div>
+          <div id="project-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.project.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group {% if form.errors.name %}has-error{% endif %}">
+          <label class="col-md-3 control-label" for="{{ form.name.id_for_label }}">Name</label>
+          <div class="col-md-9">
+            {{ form.name }}
+          </div>
+          {% if form.errors.name %}
+            <div class="col-md-12 text-right">
+              {% for error in form.errors.name %}
+                <label for="{{ form.name.id_for_label }}" class="control-label">{{ error }}</label> 
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#name-help" data-toggle="collapse" aria-expanded="false" aria-controls="name-help">Help</a>
+          </div>
+          <div id="name-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.name.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group {% if form.errors.short_description %}has-error{% endif %}">
+          <label class="col-md-3 control-label" for="{{ form.short_description.id_for_label }}">Short Description</label>
+          <div class="col-md-9">
+            {{ form.short_description }}
+          </div>
+          {% if form.errors.short_description %}
+            <div class="col-md-12 text-right">
+              {% for error in form.errors.short_description %}
+                <label for="experiment-short_description" class="control-label">{{ error }}</label> 
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#short-description-help" data-toggle="collapse" aria-expanded="false" aria-controls="short-description-help">Help</a>
+          </div>
+          <div id="short-description-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.short_description.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="{% if form.errors.population_percent %}has-error{% endif %}">
+            <label class="col-md-3 control-label" for="{{ form.population_percent.id_for_label }}">Population Size</label>
+            <div class="col-md-2 ">
+              {{ form.population_percent }} 
+            </div>
+          </div>
+          <div class="col-md-1">
+            <h5>% of</h5>
+          </div>
+          <div class="col-md-3">
+            {{ form.firefox_version }}
+          </div>
+          <div class="col-md-3">
+            {{ form.firefox_channel }}
+          </div>
+          {% if form.errors.population_percent %}
+            <div class="col-md-9 col-md-offset-3 has-error text-right">
+              {% for error in form.errors.population_percent %}
+                <label for="{{ form.name.id_for_label }}" class="control-label">{{ error }}</label> 
+              {% endfor %}
+            </div>
+          {% endif %}
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#population-percent-help" data-toggle="collapse" aria-expanded="false" aria-controls="population-percent-help">Help</a>
+          </div>
+          <div id="population-percent-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.population_percent.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label" for="{{ form.client_matching.id_for_label }}">Population Filtering</label>
+          <div class="col-md-9">
+            {{ form.client_matching }}
+          </div>
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#client-matching-help" data-toggle="collapse" aria-expanded="false" aria-controls="client-matching-help">Help</a>
+          </div>
+          <div id="client-matching-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.client_matching.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label" for="{{ form.proposed_start_date.id_for_label }}">Proposed Start Date</label>
+          <div class="col-md-9">
+            {{ form.proposed_start_date }}
+          </div>
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#proposed-start-date-help" data-toggle="collapse" aria-expanded="false" aria-controls="proposed-start-date-help">Help</a>
+          </div>
+          <div id="proposed-start-date-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.proposed_start_date.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label" for="{{ form.proposed_end_date.id_for_label }}">Proposed End Date</label>
+          <div class="col-md-9">
+            {{ form.proposed_end_date }}
+          </div>
+          <div class="col-md-9 col-md-offset-3 text-right">
+            <a href="#proposed-end-date-help" data-toggle="collapse" aria-expanded="false" aria-controls="proposed-end-date-help">Help</a>
+          </div>
+          <div id="proposed-end-date-help" class="collapse col-md-9 col-md-offset-3 help-block">
+            {{ form.proposed_end_date.help_text|safe }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="col-md-12 text-right">
+            <button type="submit" class="btn btn-info">Save</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}
