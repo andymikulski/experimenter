@@ -75,6 +75,7 @@ class ExperimentConstants(object):
     PREF_TYPE_STR = 'string'
 
     PREF_TYPE_CHOICES = (
+        (None, 'Firefox Pref Type'),
         (PREF_TYPE_BOOL, PREF_TYPE_BOOL),
         (PREF_TYPE_INT, PREF_TYPE_INT),
         (PREF_TYPE_STR, PREF_TYPE_STR),
@@ -83,6 +84,7 @@ class ExperimentConstants(object):
     PREF_BRANCH_USER = 'user'
     PREF_BRANCH_DEFAULT = 'default'
     PREF_BRANCH_CHOICES = (
+        (None, 'Firefox Pref Branch'),
         (PREF_BRANCH_DEFAULT, PREF_BRANCH_DEFAULT),
         (PREF_BRANCH_USER, PREF_BRANCH_USER),
     )
@@ -155,10 +157,224 @@ class ExperimentConstants(object):
       </p>
     """
 
+    PREF_KEY_HELP_TEXT = """
+      <p>
+        Enter the full name of the Firefox pref key that this experiment will control.  A pref experiment can control exactly one pref,
+        and each variant will receive a different value for that pref.  You can find all Firefox prefs in about:config and any pref that appears there
+        can be the target of an experiment.
+      </p>
+      <p><strong>Example:</strong> browser.example.component.enable_large_sign_in_button</p>
+    """
+
+    PREF_TYPE_HELP_TEXT = """
+      <p>
+        Select the type of the pref entered above.  The pref type will be shown in the third column in about:config.
+      </p>
+      <p><strong>Example:</strong> boolean</p>
+    """
+
+    PREF_BRANCH_HELP_TEXT = """
+      <p>
+        Select the pref branch the experiment will write its pref value to.  If you're not sure what this means, you should stick to the 'default' pref branch.
+        Pref branches are a little more complicated than can be written here, but you can
+        <a target="_blank" href="https://developer.mozilla.org/en-US/docs/Archive/Add-ons/Code_snippets/Preferences#Default_preferences">find more information here.</a>
+      </p>
+      <p><strong>Example:</strong> default</p>
+    """
+
+    CONTROL_NAME_HELP_TEXT = """
+      <p>
+        The control group should represent the users receiving the existing, unchanged version of what you're testing.  For example, if you're testing making a button larger to see
+        if users click on it more often, the control group would receive the existing button size.  You should name your control variant based on the experience or functionality
+        that group of users will be receiving.  Don't name it 'Control Group', we already know it's the control group!
+      </p>
+      <p><strong>Example:</strong> Normal Button Size</p>
+    """
+
+    CONTROL_DESCRIPTION_HELP_TEXT = """
+      <p>
+        Describe the experience or functionality the control group will receive in more detail.
+      </p>
+      <p><strong>Example:</strong> The control group will receive the existing 80px sign in button located at the top right of the screen.</p>
+    """
+
+    CONTROL_RATIO_HELP_TEXT = """
+      <p>
+        Choose the relative size of the control and experimental groups.  For most cases, a 50% : 50% split will be best, but if for some reason you want
+        more of one or the other, just adjust the slider to the desired split.
+      </p>
+      <p><strong>Example</strong> 50% Control : 50% Experimental
+    """
+
+    CONTROL_VALUE_HELP_TEXT = """
+      <p>
+        Choose the value of the pref for the control group.  This value must be valid JSON in order to be sent to Shield.
+        This should be the right type (boolean, string, number), and should be the value that represents the control or default state to compare to.
+      </p>
+      <p><strong>Boolean Example:</strong> false</p>
+      <p><strong>String Example:</strong> "some text"</p>
+      <p><strong>Integer Example:</strong> 13</p>
+    """
+
+    VARIANT_NAME_HELP_TEXT = """
+      <p>
+        The experimental group should represent the users receiving the new or changed version of what you're testing.  For example, if you're testing making a button larger to see
+        if users click on it more often, the experimental group would receive the larger button size.  You should name your experimental group based on the experience or functionality
+        that group of users will be receiving.  Don't name it 'Experimental Group', we already know it's the experimental group!
+      </p>
+      <p><strong>Example:</strong> Larger Button Size</p>
+    """
+
+    VARIANT_DESCRIPTION_HELP_TEXT = """
+      <p>
+        Describe the experience or functionality the experimental group will receive in more detail.
+      </p>
+      <p><strong>Example:</strong> The experimental group will receive the larger 120px sign in button located at the top right of the screen.</p>
+    """
+
+    VARIANT_VALUE_HELP_TEXT = """
+      <p>
+        Choose the value of the pref for the experimental group.  This value must be valid JSON in order to be sent to Shield.
+        This should be the right type (boolean, string, number), and should be the value that represents the new experimental state the experiment will be measuring.
+      </p>
+      <p><strong>Boolean Example:</strong> true</p>
+      <p><strong>String Example:</strong> "some other text"</p>
+      <p><strong>Integer Example:</strong> 14</p>
+    """
+
+    OBJECTIVES_HELP_TEXT = """
+      <p>
+        Describe the objective of the study in detail.  What changes will be made in each branch, what effects will those changes have,
+        and how will those effects be measured and compared.
+      </p>
+      <p>
+        Link to any relevant google docs / Drive files that describe the project. Links to prior art if it exists:
+      </p>
+      <p>
+        If there is prior art (e.g. testpilot, usertesting.com, field research, etc.),
+      </p>
+      <p>
+        If there are previous results (particularly if they allow for the removal of experimental branches), review them here.
+      </p>
+      <p><strong>Example:</strong> We think that by doing X we will improve [retention/page views/performance/satisfaction]</p>
+    """
+
+    ANALYSIS_HELP_TEXT = """
+      <p>
+        Describe how this study will be analyzed, including which telemetry metrics will be considered, how those metrics will be
+        analyzed to determine the outcome of the study, and who will be responsible for that analysis.
+      </p>
+      <p>
+        <strong>Example:</strong>
+        <p>Unique page views</p>
+        <p>Usage hours</p>
+        <p>Attracting heavy users and influencers.</p>
+        <p>Understanding the landscape of the web (research)</p>
+      </p>
+    """
+
+    RISKS_HELP_TEXT = """
+      <p></p>
+      <p><strong>Example:</strong></p>
+    """
+
+    TESTING_HELP_TEXT = """
+      <p>
+        Your code should be QA’d to ensure that changing the preference values has the intended effect you are looking for and does not cause obvious regressions to Firefox.
+      </p>
+      <p>
+        All experiments must pass QA. Depending on the channel/population size a dev QA may be accepted.
+      </p>
+      <p>
+        If this study requires additional QA, please provide a detailed description of how each branch can be tested and the expected behaviours.
+      </p>
+    """
+
     # Text defaults
     CLIENT_MATCHING_DEFAULT = (
 """Locales:
+
 Geographic regions:
+
 Prefs:
+
 Studies:
+
+Any additional filters:
+""")
+
+    OBJECTIVES_DEFAULT = (
+"""What is the objective of this study?  Explain in detail.
+""")
+
+    ANALYSIS_DEFAULT = (
+"""What is the main effect you are looking for and what data will you use to make these decisions? What metrics are you using to measure success
+
+
+Who is the owner of the data analysis for this study?
+
+
+Do you plan on surveying users at the end of the study? Yes/No. Strategy and Insights can help create surveys if needed
+""")
+
+    RISKS_DEFAULT = (
+"""Do any of the following apply to your experiment:
+
+Partner related Yes/No
+
+High Risk to brand or product Yes/No
+
+Needs to be shipped ASAP (outside normal Shield process) Yes/No
+
+Mozilla confidential (No public bugs or notifications) Yes/No
+
+Affects a large population of users on Release Yes/No
+
+Will this experiment require uplift? Yes/No with details if uplift is required
+
+
+If you answered yes to any of the above, your study is considered “High Risk” and will require an executive sponsor to sign off explicitly in the bug and state the known risk.
+
+RASCI
+Responsible, Accountable, Supports, Consulted, Informed
+
+
+For a high risk study, each of the following must be provided and accounted for:
+
+
+Final Experiment Design
+Responsible: Experiment owner
+Accountable: Shield Team
+
+
+Population Size
+Responsible: Experiment owner
+Accountable: SHIELD Team
+
+
+Data Analysis
+Responsible: Assigned analyst
+Accountable: SHIELD Team
+
+
+Legal Sign-Off
+Responsible: Experiment owner
+Accountable: SHIELD
+
+
+Shipping
+Responsible: Release Management
+Accountable: Shield Team
+
+
+Risk Matrix
+Responsible: Experiment owner
+Accountable: Shield Team
+""")
+
+    TESTING_DEFAULT = (
+"""QA Status of your code: Green, yellow, red.
+
+
+If additional QA is required, provide a plan for testing each branch of this study:
 """)

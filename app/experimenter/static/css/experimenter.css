@@ -8,13 +8,13 @@ a.noanchorstyle:hover {
   text-decoration: none;
 }
 
-h1 {
-  margin: 0px;
-}
-
 body {
   background-color: #F8F8F8;
   color: #212121;
+}
+
+.icon-warning {
+  color: #ecfb00; 
 }
 
 .spaced-text {
@@ -30,12 +30,16 @@ body {
 }
 
 #header {
-  background: #002d5a;
-  color: #dedede;
-  fill: #dedede;
+  background: #003f7e;
+  color: #efefef;
+  fill: #efefef;
   padding: 15px 0px;
   box-shadow: 0 2px 10px 0 rgba(6, 6, 6, 0.3);
   margin-bottom: 20px;
+}
+
+#header-user-info a {
+  color: #94bbff;
 }
 
 #site-logo {
@@ -131,6 +135,10 @@ footer {
   
 }
 
+.top-left-rounded {
+  border-top-left-radius: 5px;
+}
+
 .card {
   background-color: white;
   border-radius: 5px;
@@ -143,16 +151,22 @@ footer {
   box-shadow: 0 3px 8px 0 rgba(6, 6, 6, 0.2);
 }
 
-.top-left-rounded {
-  border-top-left-radius: 5px;
-}
-
 .card-title {
-  background-color: #828b93;
+  background-color: #34587b;
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
   color: white;
   margin: 0px;
+}
+
+.card-content {
+  margin-top: 15px;
+}
+
+.status-pill {
+  height: 20px;
+  border-radius: 10px;
+  padding: 0px 10px;
 }
 
 .status-color-Created {

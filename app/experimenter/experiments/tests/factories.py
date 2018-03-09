@@ -35,9 +35,9 @@ class ExperimentFactory(factory.django.DjangoModelFactory):
         lambda o: 'browser.{pref}.enabled'.format(
             pref=faker.catch_phrase().replace(' ', '.').lower()))
     pref_type = factory.LazyAttribute(
-        lambda o: random.choice(Experiment.PREF_TYPE_CHOICES)[0])
+        lambda o: random.choice(Experiment.PREF_TYPE_CHOICES[1:])[0])
     pref_branch = factory.LazyAttribute(
-        lambda o: random.choice(Experiment.PREF_BRANCH_CHOICES)[0])
+        lambda o: random.choice(Experiment.PREF_BRANCH_CHOICES[1:])[0])
     firefox_version = factory.LazyAttribute(
         lambda o: random.choice(Experiment.VERSION_CHOICES[1:])[0])
     firefox_channel = factory.LazyAttribute(

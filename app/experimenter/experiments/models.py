@@ -61,8 +61,10 @@ class Experiment(ExperimentConstants, models.Model):
     firefox_channel = models.CharField(
         max_length=255, choices=ExperimentConstants.CHANNEL_CHOICES)
     client_matching = models.TextField(default='', blank=True)
-    objectives = models.TextField(default='', blank=True, null=True)
-    analysis = models.TextField(default='', blank=True, null=True)
+    objectives = models.TextField(default=ExperimentConstants.OBJECTIVES_DEFAULT, blank=True, null=True)
+    analysis = models.TextField(default=ExperimentConstants.ANALYSIS_DEFAULT, blank=True, null=True)
+    risks = models.TextField(default=ExperimentConstants.RISKS_DEFAULT, blank=True, null=True)
+    testing = models.TextField(default=ExperimentConstants.TESTING_DEFAULT, blank=True, null=True)
     total_users = models.PositiveIntegerField(default=0)
     enrollment_dashboard_url = models.URLField(blank=True, null=True)
     dashboard_url = models.URLField(blank=True, null=True)
@@ -127,7 +129,7 @@ class Experiment(ExperimentConstants, models.Model):
 
     @property
     def population(self):
-        return '{percent:g}% of Firefox {version} {channel}'.format(
+        return '{percent:g}% of {channel} Firefox {version}'.format(
             percent=float(self.population_percent),
             version=self.firefox_version,
             channel=self.firefox_channel,
@@ -189,6 +191,26 @@ class Experiment(ExperimentConstants, models.Model):
             '&metrics=ALL&next=%2F&pop=ALL&scale=linear&showOutliers=false'
         ).format(slug=self.slug)
 
+    @property
+    def completed_overview(self):
+        return self.pk is not None
+
+    @property
+    def completed_variants(self):
+        return self.variants.exists()
+
+    @property
+    def completed_objectives(self):
+        return self.objectives != self.OBJECTIVES_DEFAULT and self.analysis != self.ANALYSIS_DEFAULT
+
+    @property
+    def completed_risks(self):
+        return self.risks != self.RISKS_DEFAULT and self.testing != self.TESTING_DEFAULT
+
+    @property
+    def is_launchable(self):
+        return self.complted_overview and self.completed_variants and self.completed_objectives and self.completed_risks
+
 
 class ExperimentVariant(models.Model):
     experiment = models.ForeignKey(
@@ -244,6 +266,11 @@ class ExperimentChangeLog(models.Model):
 
     objects = ExperimentChangeLogManager()
 
+    class Meta:
+        verbose_name = 'Experiment Change Log'
+        verbose_name_plural = 'Experiment Change Logs'
+        ordering = ('changed_on',)
+
     def __str__(self):  # pragma: no cover
         return '{status} by {updater} on {datetime}'.format(
           status=self.new_status,
@@ -251,7 +278,9 @@ class ExperimentChangeLog(models.Model):
           datetime=self.changed_on.date(),
         )
 
-    class Meta:
-        verbose_name = 'Experiment Change Log'
-        verbose_name_plural = 'Experiment Change Logs'
-        ordering = ('changed_on',)
+    @property
+    def pretty_status(self):
+        if self.new_status == Experiment.STATUS_CREATED and not self.old_status:
+            return 'Created Draft'
+        elif self.new_status == Experiment.STATUS_CREATED and self.old_status == Experiment.STATUS_CREATED:
+            return 'Edited Draft'

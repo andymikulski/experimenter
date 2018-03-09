@@ -19,7 +19,7 @@
   </div>
 
   {% for experiment in object.experiments.most_recently_changed %}
-    <a href="{% url "experiments-detail" slug=experiment.slug %}">
+    <a class="noanchorstyle" href="{% url "experiments-detail" slug=experiment.slug %}">
 
       <div class="row card">
 

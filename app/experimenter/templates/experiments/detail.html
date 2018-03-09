@@ -8,7 +8,7 @@
 {% block content %}
   <div id="content-header" class="row">
     <div class="col-md-12">
-      <a href="{% url "projects-detail" slug=object.project.slug %}">
+      <a class="noanchorstyle" href="{% url "projects-detail" slug=object.project.slug %}">
         {{ object.project.name }}
       </a>
       <span class="light-text">/</span>
@@ -25,66 +25,134 @@
       <div class="row card">
 
         <div class="row card-title">
-          <div class="col-md-3 status-color-{{ object.status }} top-left-rounded">
-            <h4>
-              {{ object.status }}
-            </h4>
-          </div>
 
-          <h4 class="col-md-9 text-right">
-            {{ object.population }}
+          <h4 class="col-md-8">
+            Overview
           </h4>
+
+          <div class="col-md-4 text-right">
+            <a class="noanchorstyle" href="{% url "experiments-overview-update" slug=object.slug %}"><h5><span class="glyphicon glyphicon-cog"></span> Edit</h5></a>
+          </div>
         </div>
 
-        <iframe style="display:block" scrolling="no" frameBorder="0" width="100%" height="450px" src="{{ object.enrollment_dashboard_url }}" ></iframe>
+        {% if object.is_launched %}
+          <iframe style="display:block" scrolling="no" frameBorder="0" width="100%" height="450px" src="{{ object.enrollment_dashboard_url }}" ></iframe>
+        {% else %}
+          <div class="col-md-6">
+            <h4>
+              {{ object.population }}
+            </h4>
+          </div>
+          <div class="col-md-6 text-right">
+            <h5>{{ object.proposed_start_date }} - {{ object.proposed_end_date }}</h5>
+          </div>
+          <div class="col-md-12">
+            {{ object.short_description|linebreaks }}
+          </div>
+        {% endif %}
+
       </div>
       
       <div class="row card">
+
         <div class="row card-title">
-          <h4 class="col-md-12">
-            Objectives
+          <h4 class="col-md-8">
+            {% if not object.completed_variants %}
+              <span class="icon-warning glyphicon glyphicon-exclamation-sign"></span>
+            {% endif %}
+            Firefox Pref & Variants
           </h4>
+          <div class="col-md-4 text-right">
+            <a class="noanchorstyle" href="{% url "experiments-variants-update" slug=object.slug %}"><h5><span class="glyphicon glyphicon-cog"></span> Edit</h5></a>
+          </div>
         </div>
-       
-        <div class="col-md-12">
-          <p>{{ object.objectives|linebreaks }}</p>
-        </div>
+
+        {% if object.variants.all %}
+          {% for variant in object.variants.all %}
+            <div class="col-md-6">
+              <h4>{{ variant.ratio }}% {{ variant.name }}</h4>
+              <p>{{ variant.description }}</p>
+              <p><strong>{{ object.pref_key }} = <span class="text-info">{{ variant.value }}</span></strong></p>
+            </div>
+          {% endfor %}
+        {% else %}
+          <h4 class="col-md-12">You must define your variants before you can launch your experiment.</h4>
+        {% endif %}
+
       </div>
 
-      <div class="row card">
+      <div class="row card incomplete">
         <div class="row card-title">
-          <h4 class="col-md-12">Configuration</h4>
-        </div>
-
-        <div class="col-md-12">
-          <h4>
-            {{ object.population }} ({{ object.variant_ratios }})
+          <h4 class="col-md-8">
+            {% if not object.completed_objectives %}
+              <span class="icon-warning glyphicon glyphicon-exclamation-sign"></span>
+            {% endif %}
+            Objectives & Analysis
           </h4>
-
-          <p>{{ object.client_matching }}</p>
-        </div>
-        
-        {% for variant in object.variants.all %}
-          <div class="col-md-6">
-            <h4>{{ variant.name }}</h4>
-            <p>{{ variant.description }}</p>
-            <p><strong>{{ object.pref_key }} = {{ variant.value }}</strong></p>
+          <div class="col-md-4 text-right">
+            <a class="noanchorstyle" href="{% url "experiments-objectives-update" slug=object.slug %}"><h5><span class="glyphicon glyphicon-cog"></span> Edit</h5></a>
           </div>
-        {% endfor %}
+        </div>
+        <div class="col-md-12">
+          {% if object.completed_objectives %}
+            <h4>Objectives</h4>
+            {{ object.objectives|linebreaks }}
+            <h4>Analysis</h4>
+            {{ object.analysis|linebreaks }}
+          {% else %}
+            <h4>You must define the objectives and analysis plan before you can launch your experiment.</h4>
+          {% endif %}
+        </div>
+      </div>
+      
+      <div class="row card incomplete">
+        <div class="row card-title">
+          <h4 class="col-md-8">
+            {% if not object.completed_risks %}
+              <span class="icon-warning glyphicon glyphicon-exclamation-sign"></span>
+            {% endif %}
+            Risk Owners & QA Plan
+          </h4>
+          <div class="col-md-4 text-right">
+            <a class="noanchorstyle" href="{% url "experiments-risks-update" slug=object.slug %}"><h5><span class="glyphicon glyphicon-cog"></span> Edit</h5></a>
+          </div>
+        </div>
+        <div class="col-md-12">
+          {% if object.completed_risks %}
+            <h4>Risks</h4>
+            {{ object.risks|linebreaks }}
+            <h4>Testing</h4>
+            {{ object.testing|linebreaks }}
+          {% else %}
+            <h4>You must define the risk owners and QA plan before you can launch your experiment.</h4>
+          {% endif %}
+        </div>
       </div>
 
     </div>
 
     <div class="col-md-3">
 
+      <div class="row form-group">
+        <div class="col-md-12">
+          <a id="launch-button" class="col-md-12 btn btn-success {% if not object.is_launchable %}disabled{% endif %}">
+            {% if not object.is_launchable %}<span class="icon-warning glyphicon glyphicon-exclamation-sign"></span>{% endif %}
+            Launch Experiment
+          </a>
+          {% if not object.is_launchable %}
+            <p class="help-block">You must complete every section before you can launch this experiment.</p>
+          {% endif %}
+        </div>
+      </div>
+     
       {% for change in object.changes.all reversed %}
         <div class="row">
           <div class="col-md-6">
-            <strong>{{ change.new_status }}</strong>
+            <p>{{ change.changed_on.date }}</p>
           </div>
           <div class="col-md-6 text-right">
-            <div>{{ change.changed_by }}</div>
-            <div>{{ change.changed_on.date }}</div>
+            <p>{{ change.changed_by }}</p>
+            <p>{{ change.pretty_status }}</p>
           </div>
         </div>
       {% endfor %}
